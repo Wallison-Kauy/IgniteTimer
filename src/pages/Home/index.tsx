@@ -27,6 +27,7 @@ interface Cycle {
   task: string;
   minutesAmount: number;
   startDate: Date;
+  interruptedDate?: Date;
 }
 
 export function Home() {
@@ -86,6 +87,19 @@ export function Home() {
     reset();
   }
 
+  function handleInterruprtCycle() {
+    setCycles(
+      cycles.map((cycle) => {
+        if (cycle.id === activeCycleId) {
+          return { ...cycle, interruptedDate: new Date() };
+        } else {
+          return cycle;
+        }
+      })
+    );
+    setActiveCycleId(null);
+  }
+
   useEffect(() => {
     if (activeCycle) {
       document.title = `${minutes}:${seconds} - ${activeCycle.task}`;
@@ -139,7 +153,7 @@ export function Home() {
         </CountdownContainer>
 
         {activeCycle ? (
-          <StopCountDownButton type="button">
+          <StopCountDownButton onClick={handleInterruprtCycle} type="button">
             <HandPalm size={24} />
             Interromper
           </StopCountDownButton>

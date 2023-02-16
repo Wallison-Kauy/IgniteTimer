@@ -80,7 +80,7 @@ export function Home() {
         {activeCycle ? (
           <StopCountDownButton onClick={handleInterruprtCycle} type="button">
             <HandPalm size={24} />
-            Interromper
+            Interromperr
           </StopCountDownButton>
         ) : (
           <StartCountDownButton disabled={isSubmitDisabled} type="submit">

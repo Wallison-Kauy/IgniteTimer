@@ -1,7 +1,7 @@
 import { FormContainer, TaskInput, MinutsAmoutInput } from "./styles";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useContext } from "react";
-import { CyclesContext } from "..";
+import { CyclesContext } from '../../../contexts/CyclesContext';
 import { useFormContext } from "react-hook-form";
 
 export function NewCycleForm() {

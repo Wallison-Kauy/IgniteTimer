@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, ReactNode, useState } from "react";
 
 export interface Cycle {
   id: string;
@@ -16,6 +16,7 @@ interface CreateCycleData {
 
 interface CyclesContextType {
   activeCycle: Cycle | undefined;
+  cycles:  Cycle[];
   activeCycleId: string | null;
   amountSecondsPassed: number;
   setSecondsPassed: (seconds: number) => void;
@@ -24,9 +25,13 @@ interface CyclesContextType {
   interruptCurrentCycle: () => void;
 }
 
+interface CyclesContextProviderProps {
+  children: ReactNode
+}
+
 export const CyclesContext = createContext({} as CyclesContextType);
 
-export function CyclesContextProviver() {
+export function CyclesContextProviver( {children}:CyclesContextProviderProps ) {
   const [cycles, setCycles] = useState<Cycle[]>([]);
   const [activeCycleId, setActiveCycleId] = useState<string | null>(null);
   const [amountSecondsPassed, setAmoutSecondsPassed] = useState(0);
@@ -48,7 +53,7 @@ export function CyclesContextProviver() {
     );
   }
 
-  function createNewCycle(data: NewCycleFormData) {
+  function createNewCycle(data: CreateCycleData) {
     const id = String(new Date().getTime());
 
     const newCycle: Cycle = {
@@ -62,7 +67,7 @@ export function CyclesContextProviver() {
     setActiveCycleId(id);
     setAmoutSecondsPassed(0);
 
-    reset();
+    //reset();
   }
 
   function interruptCurrentCycle() {
@@ -88,7 +93,10 @@ export function CyclesContextProviver() {
         setSecondsPassed,
         createNewCycle,
         interruptCurrentCycle,
+        cycles,
       }}
-    ></CyclesContext.Provider>
+    >
+      {children}
+    </CyclesContext.Provider>
   );
 }

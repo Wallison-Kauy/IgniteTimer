@@ -1,13 +1,7 @@
-import { createContext, ReactNode, useState } from "react";
-
-export interface Cycle {
-  id: string;
-  task: string;
-  minutesAmount: number;
-  startDate: Date;
-  interruptedDate?: Date;
-  finishedDate?: Date;
-}
+import { differenceInSeconds } from "date-fns";
+import { createContext, ReactNode, useEffect, useReducer, useState } from "react";
+import { ActionTypes, addNewCycleAction, interruptCurrentCycleAction, markCurrentCycleAsfinished } from "../reducers/cycles/actions";
+import { Cycle, cyclesReducer } from "../reducers/cycles/reducers";
 
 interface CreateCycleData {
   task: string;
@@ -32,25 +26,36 @@ interface CyclesContextProviderProps {
 export const CyclesContext = createContext({} as CyclesContextType);
 
 export function CyclesContextProviver( {children}:CyclesContextProviderProps ) {
-  const [cycles, setCycles] = useState<Cycle[]>([]);
-  const [activeCycleId, setActiveCycleId] = useState<string | null>(null);
-  const [amountSecondsPassed, setAmoutSecondsPassed] = useState(0);
+  const [cyclesState, dispatch] = useReducer(cyclesReducer,{
+    cycles: [],
+    activeCycleId: null,
+  }, (initialState) => {
+    const storedStateAsJson = localStorage.getItem('@ingnite-timer-1.0.0: cyles-state')
+    if (storedStateAsJson){
+      return JSON.parse(storedStateAsJson)
+    }
+    return initialState;
+  })
+
+  const {cycles,activeCycleId } =cyclesState
+
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId);
+
+  
+  const [amountSecondsPassed, setAmoutSecondsPassed] = useState( () => {
+    if(activeCycle){
+      return differenceInSeconds(new Date(),new Date(activeCycle.startDate))
+    } 
+    return 0
+  });
+  
 
   function setSecondsPassed(seconds: number) {
     setAmoutSecondsPassed(seconds);
   }
 
   function markCurrentCycleAsFinished() {
-    setCycles((state) =>
-      state.map((cycle) => {
-        if (cycle.id === activeCycleId) {
-          return { ...cycle, finishedDate: new Date() };
-        } else {
-          return cycle;
-        }
-      })
-    );
+    dispatch(markCurrentCycleAsfinished());
   }
 
   function createNewCycle(data: CreateCycleData) {
@@ -63,25 +68,25 @@ export function CyclesContextProviver( {children}:CyclesContextProviderProps ) {
       startDate: new Date(),
     };
 
-    setCycles((state) => [...state, newCycle]);
-    setActiveCycleId(id);
+    dispatch(addNewCycleAction(newCycle))
+  
+
+    //setCycles((state) => [...state, newCycle]);
+
     setAmoutSecondsPassed(0);
 
     //reset();
   }
 
   function interruptCurrentCycle() {
-    setCycles((state) =>
-      state.map((cycle) => {
-        if (cycle.id === activeCycleId) {
-          return { ...cycle, interruptedDate: new Date() };
-        } else {
-          return cycle;
-        }
-      })
-    );
-    setActiveCycleId(null);
+    dispatch(interruptCurrentCycleAction())
   }
+
+  useEffect( () => {
+    const stateJSON = JSON.stringify(cyclesState)
+
+    localStorage.setItem('@ingnite-timer-1.0.0: cyles-state', stateJSON)
+  }),[cyclesState]
 
   return (
     <CyclesContext.Provider

@@ -11,6 +11,7 @@ export function Countdown() {
     setSecondsPassed,
     amountSecondsPassed,
   } = useContext(CyclesContext);
+  
   const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0;
 
   const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0;
@@ -20,6 +21,8 @@ export function Countdown() {
 
   const minutes = String(minutesAmout).padStart(2, "0");
   const seconds = String(secondsAmout).padStart(2, "0");
+
+  
 
   useEffect(() => {
     if (activeCycle) {
@@ -34,7 +37,7 @@ export function Countdown() {
       interval = setInterval(() => {
         const secondsDifference = differenceInSeconds(
           new Date(),
-          activeCycle.startDate
+          new Date(activeCycle.startDate)
         );
 
         if (secondsDifference >= totalSeconds) {
@@ -44,6 +47,8 @@ export function Countdown() {
         } else {
           setSecondsPassed(secondsDifference);
         }
+
+        console.log(secondsDifference);
       }, 1000);
     }
 
@@ -51,6 +56,9 @@ export function Countdown() {
       clearInterval(interval);
     };
   }, [activeCycle, totalSeconds, activeCycleId, markCurrentCycleAsFinished]);
+
+  console.log("amout ->",amountSecondsPassed);
+  console.log("total seconds ->",totalSeconds);
 
   return (
     <CountdownContainer>
